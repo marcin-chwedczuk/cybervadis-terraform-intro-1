@@ -349,7 +349,31 @@ echo "{ \"username\": \"$(id -u -n)\" }";
 ```
 ---
 # HCL Basics - Lists
+* `count` meta-attribute allow us to create multiple copies of the resource
+* We can use `count` with list variables thank to two auxiliary functions `length(list)`
+ and `element(list,index)`
+* Properties of "multi-resources" can be accessed using syntax `${local_file.hello_world.123.filename}`
+ or if you want to get a list of values `${local_file.hello_world.*.filename}`
 
+```yaml
+variable "list_of_files" {
+  description = "List of file names like [\"foo\",\"bar\"]."
+  type        = "list"
+}
+
+provider "local" {}
+
+resource "local_file" "hello_world" {
+  count   = "${length(var.list_of_files)}"
+  content = "Hello file ${element(var.list_of_files, count.index)}!"
+
+  filename = "${path.module}/hello_world_${count.index}.txt"
+}
+
+output "list_of_created_files" {
+  value = "${local_file.hello_world.*.filename}"
+}
+```
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
