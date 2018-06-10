@@ -212,7 +212,7 @@ Bonus! You may use `terraform fmt` to perttify all `.tf` files before commit.
 
 There is also VSCode extension for editing TF files. Yay!
 ---
-# HCL Basics
+# HCL Basics - Providers
 
 * `provider`s are responsible for managing resources. 
  For example `azurerm` will allow us to manage Azure cloud resources
@@ -228,7 +228,7 @@ provider "aws" {
 }
 ```
 ---
-# HCL Basics
+# HCL Basics - Resources
 
 * `resource`s are parts of our infrastructure like servers, load balancers, service bus topics etc.
 * To define resource we use syntax:
@@ -292,6 +292,64 @@ create_file_name = /.../examples/002_variables/hello_world.txt
 # for example:
 "${local_file.hello_world.filename}"
 ```
+---
+# HCL Basics - Data
+* TF providers allow us to query our infrastructure 
+* An Example: Looking for a suitable Amazon Machine Image (AMI):
+
+```yaml
+data "aws_ami" "ubuntu" {
+  owners = ["099720109477"]
+  filter {
+    name = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"]
+  }
+  filter {
+    name = "virtualization-type"
+    values = ["hvm"]
+  }
+  most_recent = true
+}
+
+# Later usage
+resource "aws_instance" "app_server" {
+  ami = "${data.aws_ami.ubuntu.id}"
+  ...
+}
+``` 
+---
+# HCL Basics - Data
+* TF data query can also call external programs and scripts
+* TF data can only parse JSON format (no free text format)
+
+```yaml
+provider "local" {}
+
+data "external" "current_user_name" {
+  program = ["bash", "${path.module}/get_user_name.sh"]
+
+  query = {}
+}
+
+resource "local_file" "hello_user" {
+  content  = "Hi ${data.external.current_user_name.result.username}!"
+  filename = 
+	"${path.module}/hello_${data.external.current_user_name.result.username}"
+
+  provisioner "local-exec" {
+    # Make file readonly
+    command = "chmod a-wx ${local_file.hello_user.filename}"
+  }
+}
+```
+```bash
+# get_user_name.sh
+#!/bin/bash
+echo "{ \"username\": \"$(id -u -n)\" }";
+```
+---
+# HCL Basics - Lists
+
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
