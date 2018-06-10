@@ -389,6 +389,57 @@ up to 10 minutes)
 # HCL Basics - Dependencies
 .center[![Dependency graph](dependency_graph.png)]
 
+---
+# HCL Basics - Modules
+* Modules reside in separate directories or subdirectories (TF can even load modules from remote git repository)
+* You should tread modules as units of reusability (they are like functions in imperative programming)
+
+```yaml
+variable "filename_prefix" {} # Module input
+
+data "external" "current_user_name" {
+  program = ["bash", "${path.module}/get_user_name.sh"]
+  query = {}
+}
+
+resource "local_file" "hello_user" {
+  content  = "Hi ${data.external.current_user_name.result.username}!"
+  filename = 
+	"${var.filename_prefix}_${data.external.current_user_name.result.username}"
+  provisioner "local-exec" {
+    command = "chmod a-wx ${local_file.hello_user.filename}"
+  }
+}
+
+output "filename" { # Module output
+  value = "${local_file.hello_user.filename}"
+}
+```
+---
+# HCL Basics - Modules
+* `source` property contains relative path to module directory
+* Modules can be read from many sources. For example they can be read
+ from Terraform Registry (something like Docker Hub)
+* Production grade modules should be versioned
+
+```yaml
+provider "local" {}
+
+module "hello_current_user" {
+  source          = "hello_user"
+  filename_prefix = "hello" # Pass input to module
+}
+
+module "witaj_current_user" {
+  source          = "hello_user"
+  filename_prefix = "witaj"
+}
+
+output "created_files" { # Get output from module
+  value = ["${module.hello_current_user.filename}", 
+		"${module.witaj_current_user.filename}"]
+}
+```
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
