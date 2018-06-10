@@ -1,17 +1,119 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Title</title>
+    <title>Hello, Terraform</title>
     <meta charset="utf-8">
     <style>
       @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
       @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
       @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
 
-      body { font-family: 'Droid Serif'; }
+      body {
+        font-family: 'Droid Serif';
+      }
       h1, h2, h3 {
         font-family: 'Yanone Kaffeesatz';
-        font-weight: normal;
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 4em;
+		right: 4em;
+      }
+      li p { line-height: 1.25em; }
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
       }
       .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
     </style>
@@ -21,20 +123,122 @@
 
 class: center, middle
 
-# Title
+# Hello, Terraform
+part I
+
+.footnote[by Marcin Chwedczuk]
 
 ---
 
-# Agenda
+# Infrastructure as code
 
-1. Introduction
-2. Deep-dive
-3. ...
+According to Wikipedia:
+
+> **Server provisioning** is a set of actions to prepare a server 
+with appropriate systems, data and software, and make it ready for network operation.
+
+> Typical tasks when provisioning a server are: select a server from a pool of available servers, 
+load the appropriate software and appropriately customize and configure the system and the software.
+
+TODO: TF is Server provisioning tool
 
 ---
 
-# Introduction
+# Terraform "Hello, world!"
 
+* Infrastructure is described as a set of `.tf` files
+* HCL (HashiCorp Configuration Language) is used to describe a new state of the infrastructure
+* Terraform (TF) figures out what changes must applied to the current state of the system to 
+ transition it into the new state
+
+Let's start with a simple TF script that creates a file on your local machine:
+
+```yaml
+# This is a comment
+
+/* This is a multiline
+ * comment
+ */
+
+provider "local" {}
+
+# resource RESOURCE_TYPE TF_RESOURCE_NAME
+resource "local_file" "hello_world" {
+  content = "Hello, World!"
+
+  # ${path.module} - directory containing this .tf file
+  filename = "${path.module}/hello_world"
+}
+```
+
+---
+# Terraform "Hello, world!"
+
+When running terraform for the first time or after adding a new provider you must execute:
+```bash
+$ terraform init
+```
+This will download all necessary providers to `.terraform` directory.
+
+```bash
+$ terraform plan
+```
+Will return a list of changes that TF is going to apply to the infrastructure
+
+Finally, you can apply the changes by running:
+```bash
+$ terraform apply
+```
+The results of all these:
+```bash
+$ ls
+hello_world  local_files.tf  terraform.tfstate
+```
+
+---
+# Terraform "Hello, world!"
+
+`terraform.tfstate` file is used to keep current snapshot of the infrastructure. 
+Do NOT edit or modify this file. The same rule applies to the infrastructure. When you are using TF
+you must NOT modify infrastructure manually. Otherwise it will get out of sync with TF state
+and you may expect some really horrendous problems.
+
+To rollback all changes just invoke:
+```bash
+$ terraform destroy
+```
+
+Bonus! You may use `terraform fmt` to perttify all `.tf` files before commit.
+
+There is also VSCode extension for editing TF files. Yay!
+---
+# HCL Basics
+
+* `provider`s are responsible for managing resources. 
+ For example `azurerm` will allow us to manage Azure cloud resources
+* `local` provider used in "hello world" example manages local machine resources like files
+* Often you must configure provider before you can use it, e.g.
+
+```yaml
+# Configure the AWS Provider
+provider "aws" {
+  access_key = "ABCD1234ABCD"
+  secret_key = "ABCDABCDABCD"
+  region     = "us-east-1"
+}
+```
+---
+# HCL Basics
+
+* `resource`s are parts of our infrastructure like servers, load balancers, service bus topics etc.
+* To define resource we use syntax:
+
+```yaml
+resource "<resource_type>" "<tf-resource-name>" {
+	resource configruation
+}
+```
+* Resources can depend on each other (more on that later)
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
