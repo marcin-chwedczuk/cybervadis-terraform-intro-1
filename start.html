@@ -374,6 +374,21 @@ output "list_of_created_files" {
   value = "${local_file.hello_world.*.filename}"
 }
 ```
+---
+# HCL Basics - Dependencies
+* TF automatically detects dependencies between resources, varaibles, datas etc.
+* If resource `machine.service_a` has inside its definition a reference to value `${machine.service_b.some_prop}`,
+ then resource `machine.service_a` is dependent on resource `machine.service_b` and will be created after `service_b`
+* TF will try to perform as much parallel operations as possible without breaking dependencies
+ (mostly to speed things up, e.g. creating a simple database on AWS can take
+up to 10 minutes)
+* `terraform graph` will generate graph of dependencies in DOT format
+* You can use GraphViz library or sites like https://dreampuf.github.io/GraphvizOnline/ to generate image from DOT description
+
+---
+# HCL Basics - Dependencies
+.center[![Dependency graph](dependency_graph.png)]
+
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
