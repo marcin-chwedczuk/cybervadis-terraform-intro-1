@@ -421,6 +421,7 @@ output "filename" { # Module output
 * Modules can be read from many sources. For example they can be read
  from Terraform Registry (something like Docker Hub)
 * Production grade modules should be versioned
+* You must run `terraform get -update` otherwise TF will not notice updates made to module code
 
 ```yaml
 provider "local" {}
