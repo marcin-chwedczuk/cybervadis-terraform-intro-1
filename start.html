@@ -140,7 +140,20 @@ with appropriate systems, data and software, and make it ready for network opera
 > Typical tasks when provisioning a server are: select a server from a pool of available servers, 
 load the appropriate software and appropriately customize and configure the system and the software.
 
-TODO: TF is Server provisioning tool
+---
+# Infrastructure as code
+
+Currently we have three types of solutions that try to address IaC problems:
+
+* Configuration Management Tools: Ansible, Chef, Puppet
+* Server Templating Tools: Docker, Packer
+* Server Provisioning Tools: Terraform, Cloud Formation, Heat
+
+We also have container management platforms like Kubernetes 
+and Rancher (started as an independent solution, but becomes just a nice UI for Kubernetes).
+
+* Terraform - an open source product, created by HashiCorp (mostly known by its other tools like Vagrant and Consul)
+* Cutting edge technology (started just 3 years ago), written in Go, crossplatform 
 
 ---
 
@@ -460,6 +473,47 @@ output "created_files" { # Get output from module
 * We will create database and role in that database
 * Check `examples\007_db_provisioning`
 
+---
+# Problem with shared state
+
+* So far we allow TF to write infrastructure state snapshot to 
+ current directory (`terraform.tfstate` file)
+* When working in teams state must be shared between team members
+* HashiCorp offers a commercial solution called Terraform Enterprise
+ that can store state snapshot (also offers private module registry)
+* State can also be keept in AWS S3 buckets, Azure Storage or in Consul (Distributed configuration server)
+* This solves only half of the problem. Even with shared state two users may try to perform two different 
+ operations on infrastructure. Locking also is needed
+* Open source project called `terragrunt` offers simple locking solution
+
+---
+# How to organize team work around Terraform
+
+* Blog: https://blog.gruntwork.io/how-to-use-terraform-as-a-team-251bc1104973
+* Book: https://www.terraformupandrunning.com/ (short book, about 200 pages with plenty of images)
+* General idea: DevOps'es prepare reusable modules that are stored in a separate repository
+ and are versioned
+* All team members use above modules to define infrastructure
+* For every environment we have a separate folder with the definition of insfrastructure for that environment
+ (all in the same repo)
+* How to integrate this approach with existing CI/CD?
+---
+# Terraform - Summary
+
+Pros:
+* A lot of examples (mostly for AWS and Azure) on GitHub
+* Can provision several cloud providers at once
+* Declarative language (you describe desired state of your infrastructure, not changes
+ that should be made)
+
+Cons:
+* Poor documentation and not too many answers on StackOverflow 
+ (just 1.5k, huge number of them without answers)
+* Written in Go (looking at the source code of the providers may be more time consuming)
+* Syntax errors in configuration files may cause strange error messages
+* Do not tolerates delays when cloud processes infrastructure change requests async (confirmed on AWS).
+ From user point of view this means you must run `terraform apply` several times
+* Configuration depends on cloud provider (move to another cloud provider = rewrite configuration)
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
