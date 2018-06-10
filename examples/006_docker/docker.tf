@@ -12,7 +12,7 @@ resource "docker_network" "app_net" {
 
 # Container with Postgres
 resource "docker_image" "postgres-image" {
-  name = "postgres:11"
+  name = "postgres:9"
 }
 
 resource "docker_container" "db" {
