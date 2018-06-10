@@ -441,6 +441,16 @@ output "created_files" { # Get output from module
 		"${module.witaj_current_user.filename}"]
 }
 ```
+---
+# HCL Basics - Other nice things
+
+* `create_before_destroy` resource property allows us to perform infrastructure updates
+ without downtime
+* `prevent_destroy` resource property may protect resources from `terraform destroy`
+* `terraform console` opens interpreter that allows you to play with `${...}` expressions
+* TF provides a lot of useful functions like `file(file_name)` to read contents of file
+ or `uuid()` to create a new UUID/GUID
+
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
