@@ -239,6 +239,59 @@ resource "<resource_type>" "<tf-resource-name>" {
 }
 ```
 * Resources can depend on each other (more on that later)
+
+---
+# HCL Basics - Variables
+
+* TF allow us to define input and output variables. Input variables may be e.g. number of servers to create.
+ Output variable e.g. DNS CNAME records for created servers
+
+```yaml
+variable "file_suffix" {
+  description = "Suffix of the file with dot, e.g. `.txt`."
+  # No extension by default
+  default = ""
+  # type - string by default, but can also be list or map
+  type = "string"
+}
+
+provider "local" {}
+
+resource "local_file" "hello_world" {
+  content = "Hello, World!"
+  filename = "${path.module}/hello_world${var.file_suffix}"
+}
+
+output "create_file_name" {
+  description = "Full path of the created file name."
+  value       = "${local_file.hello_world.filename}"
+}
+```
+---
+# HCL Basics - Variables
+
+* Variables can be set via command line parameters:
+```bash
+$ terraform apply -var 'file_suffix=.txt'
+```
+* Or read from a `terraform.tfvars` file (in current working directory):
+```yaml
+file_suffix = ".txt"
+```
+* Output variables are written to stdout:
+```
+create_file_name = /.../examples/002_variables/hello_world.txt
+```
+* You may access variable value in the code using syntax:
+```yaml
+"${var.variable_name}"
+```
+* Also resources export various properties that can be later accessed using syntax:
+```yaml
+"${resource_type.tf_resource_name.property}"
+# for example:
+"${local_file.hello_world.filename}"
+```
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>

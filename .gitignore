@@ -2,4 +2,5 @@
 # Terraform files
 .terraform/
 *.tfstate
+*.tfstate.backup
 
